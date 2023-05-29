@@ -1,4 +1,24 @@
-# sadly this should be write with the project name
+.vscode/
+*.rar
+*.o
+*.d
+*.crf
+*.htm
+*.dep
+*.map
+*.bak
+*.lnp
+*.lst
+*.ini
+*.iex
+*.sct
+*.scvd
+*.uvguix
+*.dbg*
+*.uvguix.*
+.mxproject
+*.uvguit
+*.uvgui.*
 
-MDK-ARM/blink.uvguix.*
-MDK-ARM/blink
+*.axf
+*.hex
