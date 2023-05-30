@@ -4,4 +4,4 @@
 
 
 
-TODO：修改为外置晶振、easylogger使用dma实现
+TODO：修改为外置晶振

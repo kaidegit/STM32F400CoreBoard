@@ -75,9 +75,9 @@ void elog_dma_tx_cplt_callback(void) {
     elog_dma_busy_flag = false;
 }
 
-// i dont think it is a good way to disable irq as lock
-// if you dont use log at irq, you can remove it
-// if you use log at irq, get a rtos
+// i dont think it is a good way to control irq as lock
+// if you dont use log at irq, you can ignore it like i do
+// if you want to use log at irq, get a rtos and use async mode
 // enable and disable irq here will cause missing dma tx complete interrupt
 void elog_port_output_lock(void) {
 //    __disable_irq();
