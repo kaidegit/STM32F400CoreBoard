@@ -31,6 +31,10 @@
 #include "string.h"
 #include "usart.h"
 #include "stdio.h"
+#include "stdbool.h"
+
+static volatile uint8_t elog_dma_busy_flag = false;
+static uint8_t elog_dma_buf[ELOG_LINE_BUF_SIZE] = {0};
 
 /**
  * EasyLogger port initialize
@@ -56,18 +60,32 @@ void elog_port_deinit(void) { /* add your code here */
  * @param size log size
  */
 void elog_port_output(const char *log, size_t size) {
-    HAL_UART_Transmit(&huart6, (uint8_t *)log, size, 0xff);
+    while (elog_dma_busy_flag) {
+        // actually, it is not a good way to wait here
+        // as it is no os project, we just do it in this way
+        HAL_Delay(10);
+    }
+    memcpy(elog_dma_buf, log, size);
+    HAL_UART_Transmit_DMA(&huart6, elog_dma_buf, size);
+    elog_dma_busy_flag = true;
 }
 
-/**
- * output lock
- */
-void elog_port_output_lock(void) { __disable_irq(); }
+// it should be called after dma transfer complete
+void elog_dma_tx_cplt_callback(void) {
+    elog_dma_busy_flag = false;
+}
 
-/**
- * output unlock
- */
-void elog_port_output_unlock(void) { __enable_irq(); }
+// i dont think it is a good way to disable irq as lock
+// if you dont use log at irq, you can remove it
+// if you use log at irq, get a rtos
+// enable and disable irq here will cause missing dma tx complete interrupt
+void elog_port_output_lock(void) {
+//    __disable_irq();
+}
+
+void elog_port_output_unlock(void) {
+//    __enable_irq();
+}
 
 /**
  * get current time interface
@@ -77,23 +95,8 @@ void elog_port_output_unlock(void) { __enable_irq(); }
 const char *elog_port_get_time(void) {
     uint32_t tick = HAL_GetTick();
     static char tick_str[12] = {0};
-    char *str_start = tick_str;
-    uint8_t i = 10;
-    memset(tick_str, 0, 12);
-    if (tick == 0) {
-        tick_str[i] = '0';
-    } else {
-        while (tick > 0) {
-            tick_str[i] = tick % 10 + '0';
-            tick /= 10;
-            i--;
-        }
-    }
-    while (((*str_start) == '\0') && (str_start < (tick_str + 12))) {
-        str_start++;
-    }
-//    sprintf(tick_str,"%lu",tick);
-    return str_start;
+    sprintf(tick_str, "%lu", tick);
+    return tick_str;
 }
 
 /**

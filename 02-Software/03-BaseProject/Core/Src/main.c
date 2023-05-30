@@ -145,6 +145,7 @@ int main(void)
   {
       HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
       HAL_Delay(1000);
+//      elog_i(TAG, "HelloWorld!")
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -204,6 +205,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if(htim->Instance == TIM11) {   // it will be called every 5ms
         button_ticks();
+    }
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == USART6) {    // it will be called after log dma tx complete
+        extern void elog_dma_tx_cplt_callback();
+        elog_dma_tx_cplt_callback();
     }
 }
 /* USER CODE END 4 */
